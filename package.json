@@ -6,20 +6,32 @@
   "scripts": {
     "start": "node index.js",
     "seed": "node seed-products.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:db": "ts-node src/tests/dbTest.ts"
   },
   "dependencies": {
-    "whatsapp-web.js": "^1.27.0",
     "@modelcontextprotocol/sdk": "^1.9.0",
-    "qrcode-terminal": "^0.12.0",
+    "dotenv": "^16.5.0",
+    "mongoose": "^8.13.2",
     "openai": "^4.30.0",
-    "mongoose": "^8.1.0",
-    "dotenv": "^16.3.1",
-    "puppeteer": "^22.0.0"
+    "puppeteer": "^22.0.0",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.27.0"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "author": "",
-  "license": "MIT"
-} 
+  "license": "MIT",
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^22.14.1",
+    "typescript": "^5.8.3",
+    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/parser": "^7.3.1",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2"
+  }
+}

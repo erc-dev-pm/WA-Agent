@@ -1,94 +1,109 @@
-# WhatsApp MCP Agent
+# WhatsApp Agent for Sticky Addiction
 
-A WhatsApp agent that leverages Model Context Protocol (MCP) to access various tools and services directly through WhatsApp messaging.
+A WhatsApp-based agent powered by AI for automated customer service and product recommendations.
 
-## Features
+## Implementation Plan
 
-- WhatsApp integration using whatsapp-web.js
-- MCP integration for accessing tools and services
-- LLM processing using OpenAI's models (GPT-3.5-turbo and GPT-4o)
-- Product catalog and price management with MongoDB
-- Intelligent model selection based on query complexity
-- Support for both 1:1 chats and group chat mentions
+### ✅ Phase 1: Core Setup and Data Models
+- ✅ Project initialization and dependency setup
+- ✅ Environment configuration
+- ✅ Database connection setup
+- ✅ Core data models implementation
+  - ✅ Product schema and model
+  - ✅ Customer schema and model
+  - ✅ Order schema and model
+- ✅ Database integration tests
 
-## Prerequisites
+### 🔄 Phase 2: WhatsApp Integration (Next)
+- Set up WhatsApp Web client
+- Implement session management
+- Handle QR code generation and authentication
+- Implement message event listeners
+- Set up message queuing system
+- Implement rate limiting and retry mechanisms
 
-- Node.js v18.0.0 or later
-- MongoDB database
-- OpenAI API key
-- MCP server (like VeyraX) for tools access
-- WhatsApp account for the bot
+### Phase 3: Message Processing System
+- Implement message handler service
+- Create intent detection system
+- Set up conversation state management
+- Implement product recommendation logic
+- Create order processing workflow
+- Set up notification system
 
-## Installation
+### Phase 4: AI Integration
+- Implement OpenAI integration
+- Create prompt templates
+- Set up context management
+- Implement response generation
+- Create fallback mechanisms
+- Set up AI model selection logic
 
-1. Clone the repository:
-   ```
-   git clone <repository-url>
-   cd whatsapp-mcp-agent
-   ```
+### Phase 5: Business Logic
+- Implement product catalog management
+- Create order management system
+- Set up customer profile management
+- Implement analytics tracking
+- Create reporting system
+- Set up admin notifications
 
+### Phase 6: Testing and Deployment
+- Write unit tests
+- Implement integration tests
+- Set up CI/CD pipeline
+- Create deployment scripts
+- Set up monitoring
+- Create backup systems
+
+## Setup Instructions
+
+1. Clone the repository
 2. Install dependencies:
-   ```
+   ```bash
    npm install
    ```
-
-3. Create a `.env` file based on `.env.example` with your configuration:
-   ```
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
-
-4. Seed the product database (optional):
-   ```
-   npm run seed
+3. Set up environment variables in `.env`
+4. Run the development server:
+   ```bash
+   npm run dev
    ```
 
-## Usage
+## Testing
 
-1. Start the agent:
-   ```
-   npm start
-   ```
+Run database tests:
+```bash
+npm run test:db
+```
 
-2. Scan the QR code with your WhatsApp to authenticate.
+## Environment Variables
 
-3. The agent will now respond to messages in both individual chats and group chats (when mentioned).
-
-## MCP Tools Integration
-
-The agent integrates with MCP servers to access various tools. The MCP manager discovers available tools and converts them to a format compatible with OpenAI's function calling interface.
-
-## Product Catalog
-
-The agent includes a product catalog system with:
-- Product search
-- Price management with history tracking
-- Categorization and tagging
-
-## Configuration
-
-Key configuration options in `.env` file:
-
-- `OPENAI_API_KEY`: Your OpenAI API key
+Required environment variables:
 - `MONGODB_URI`: MongoDB connection string
-- `MCP_SERVER_URL`: URL of your MCP server
-- `COMPLEXITY_THRESHOLD`: Threshold for model selection (0.0-1.0)
-- `SESSION_DATA_PATH`: Path to store WhatsApp session data
+- `DB_NAME`: Database name
+- `OPENAI_API_KEY`: OpenAI API key
+- `WHATSAPP_SESSION_DATA`: WhatsApp session data path
+- `LOG_LEVEL`: Logging level (debug, info, warn, error)
 
-## Extending
+## Project Structure
 
-### Adding New MCP Tools
-
-New MCP tools are automatically discovered from the MCP server.
-
-### Customizing Product Management
-
-Modify the `ProductCatalogManager` and `Product` model to add new features to the product catalog.
-
-## License
-
-MIT
+```
+wa-agent/
+├── src/
+│   ├── config/         # Configuration files
+│   ├── models/         # Database models
+│   ├── services/       # Business logic services
+│   ├── types/          # TypeScript type definitions
+│   ├── utils/          # Utility functions
+│   └── tests/          # Test files
+├── dist/               # Compiled JavaScript files
+└── session-data/       # WhatsApp session data
+```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. 
+1. Create a feature branch
+2. Make your changes
+3. Submit a pull request
+
+## License
+
+MIT License 
