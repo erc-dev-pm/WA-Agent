@@ -1,0 +1,25 @@
+{
+  "name": "wa-agent",
+  "version": "1.0.0",
+  "description": "WhatsApp agent leveraging Model Context Protocol (MCP) for advanced capabilities",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "seed": "node seed-products.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "whatsapp-web.js": "^1.27.0",
+    "@modelcontextprotocol/sdk": "^1.9.0",
+    "qrcode-terminal": "^0.12.0",
+    "openai": "^4.30.0",
+    "mongoose": "^8.1.0",
+    "dotenv": "^16.3.1",
+    "puppeteer": "^22.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "",
+  "license": "MIT"
+} 
