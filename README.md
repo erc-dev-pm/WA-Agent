@@ -1,151 +1,188 @@
-# WhatsApp Agent for Sticky Addiction
+# WhatsApp Agent with OpenRouter & MCP Integration
 
-A WhatsApp-based agent powered by AI for automated customer service and product recommendations. This agent helps manage product inquiries, order processing, and customer support for Sticky Addiction's foodservice range.
+A WhatsApp bot that integrates OpenRouter models with Model Context Protocol (MCP) to create a powerful conversational agent with tool-calling capabilities.
 
 ## Features
 
-- Automated customer service via WhatsApp
-- Product catalog browsing and recommendations
-- Order processing and tracking
-- Customer profile management
-- AI-powered conversation handling
-- Analytics and reporting
-- Rate-limited message processing
-- Intelligent intent detection
-- Queue-based message handling
-- Error recovery and retry mechanisms
+- **WhatsApp Integration:** Seamlessly connect to WhatsApp Web to send and receive messages
+- **OpenRouter Integration:** Access a variety of AI models through the OpenRouter API
+- **MCP Support:** Execute tools through the Model Context Protocol
+- **Multi-modal Support:** Process both text and image inputs
+- **Rate Limiting:** Built-in protection against excessive message processing
+- **Conversation Context:** Maintain context throughout conversations
+- **Tool Calling:** Allow AI models to execute tools when needed
 
-## Current Status
+## Setup
 
-Version 0.2 - Message processing enhancements in progress. Core functionality and message handling system are now implemented. LLM integration and advanced processing features are under development. See [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for detailed development roadmap and progress.
+### Prerequisites
 
-## Prerequisites
+- Node.js 18+
+- npm or yarn
+- OpenRouter API key
+- MCP server (optional)
 
-- Node.js >= 18.0.0
-- MongoDB Atlas account
-- WhatsApp account for testing
-- OpenAI API key
+### Installation
 
-## Setup Instructions
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/wa-agent.git
+   cd wa-agent
+   ```
 
-1. Clone the repository
 2. Install dependencies:
-   ```bash
+   ```
    npm install
    ```
-3. Set up environment variables in `.env`:
-   ```env
-   # Required environment variables
-   MONGODB_URI=your_mongodb_connection_string
-   DB_NAME=wa_agent
-   OPENAI_API_KEY=your_openai_api_key
-   WHATSAPP_SESSION_DATA=./session-data
+
+3. Create a `.env` file with the following variables (see `.env.example` for more options):
+   ```
+   # Required
+   OPENROUTER_API_KEY=your_openrouter_api_key
+   OPENROUTER_DEFAULT_MODEL=openai/gpt-3.5-turbo
+   OPENROUTER_COMPLEX_MODEL=openai/gpt-4o
+   OPENROUTER_MULTIMODAL_MODEL=openai/gpt-4o
+   
+   # Optional - MCP Integration
+   MCP_ENABLED=true
+   MCP_SERVER_URL=your_mcp_server_url
+   
+   # Optional - WhatsApp Configuration
+   WHATSAPP_SESSION_PATH=./sessions/default-session
+   WHATSAPP_RECONNECT_INTERVAL=30000
+   
+   # Optional - Logging
    LOG_LEVEL=info
+   LOG_FILE_PATH=./logs/wa-agent.log
+   
+   # Optional - Rate Limiting
+   RATE_LIMIT_ENABLED=true
+   RATE_LIMIT_WINDOW=60000
+   RATE_LIMIT_MAX_MESSAGES=30
    ```
-4. Run the development server:
-   ```bash
-   npm run dev
+
+4. Build the TypeScript files:
+   ```
+   npm run build
    ```
 
-## Available Scripts
+### Running the Agent
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run test:db` - Run database tests
-- `npm run lint` - Run linter
-- `npm run format` - Format code
-
-## Project Structure
-
+You can use the provided deployment script for easy setup:
 ```
-src/
-├── config/           # Configuration files
-├── models/          # Database models and schemas
-├── services/        # Core business logic
-│   ├── messageHandler.ts    # Message intent detection and routing
-│   ├── messageQueue.ts     # Message queueing and processing
-│   ├── orderHandler.ts     # Order management logic
-│   ├── orderService.ts     # Order processing service
-│   └── whatsappClient.ts   # WhatsApp API integration
-├── types/           # TypeScript type definitions
-├── utils/           # Utility functions and helpers
-├── tests/          # Test files
-└── index.ts        # Application entry point
+# Quick start in foreground mode
+./deploy.sh
 
-dist/               # Compiled JavaScript files
-sessions/           # WhatsApp session data
+# Or run in background mode
+./deploy.sh background
 ```
 
-## Documentation
+Alternatively, you can start the WhatsApp agent directly:
+```
+npm start
+```
 
-- [Implementation Plan](./IMPLEMENTATION_PLAN.md) - Detailed development roadmap
-- [API Documentation](./docs/API.md) - API endpoints and usage
-- [Database Schema](./docs/SCHEMA.md) - Database structure and relationships
+When first launched, the agent will display a QR code that you need to scan with your WhatsApp mobile app to authenticate.
+
+## Usage
+
+Once connected, the WhatsApp agent can:
+
+1. Respond to text messages using AI models from OpenRouter
+2. Process images with captions for visual analysis
+3. Execute tools through MCP when appropriate (web search, file management, etc.)
+
+Example interactions:
+- Send a text message with questions or instructions
+- Send an image with a caption like "What's in this image?"
+- Ask it to search for information: "Can you search for the latest news about AI?"
+
+## Testing
+
+The project includes several test scripts to verify functionality:
+
+```
+# Test OpenRouter integration
+npm run test:openrouter
+
+# Test image processing capabilities
+npm run test:image
+
+# Test MCP integration
+npm run test:mcp
+
+# Test the full integration of OpenRouter and MCP
+npm run test:openrouter-mcp
+
+# Test WhatsApp integration
+npm run test:whatsapp
+
+# Run a simple WhatsApp test
+npm run test:simple
+```
+
+## Architecture
+
+The agent is built with a modular architecture:
+
+### Core Components
+
+1. **WhatsAppClient**: 
+   - Handles WhatsApp Web connections and authentication
+   - Manages message sending and receiving
+   - Processes media content (images, documents, etc.)
+   - Implements reconnection logic for reliability
+
+2. **OpenRouterService**:
+   - Connects to the OpenRouter API
+   - Provides model selection logic based on query complexity
+   - Handles image processing capabilities
+   - Implements retry mechanisms and error handling
+
+3. **MCPManager**:
+   - Manages connection to the MCP server
+   - Discovers available tools
+   - Executes tool calls and processes results
+   - Handles connection state and reconnections
+
+4. **OpenRouterMessageHandler**:
+   - Central integration component
+   - Manages conversation context
+   - Coordinates between WhatsApp, OpenRouter, and MCP
+   - Implements rate limiting
+   - Extracts tool calls from AI responses
+   - Processes results and delivers responses
+
+### Message Flow
+
+1. User sends a message to the WhatsApp number
+2. Message is received by `WhatsAppClient` and passed to the queue
+3. `OpenRouterMessageHandler` processes the message
+4. Message is sent to OpenRouter via `OpenRouterService`
+5. If the response contains tool calls, they're extracted and executed via `MCPManager`
+6. Final response is sent back to the user
+
+For more details on the architecture, see `INTEGRATION_SUMMARY.md`.
+
+## Deployment
+
+For production deployment, we recommend:
+
+1. Setting up a dedicated server with Node.js 18+
+2. Using the provided deployment script: `./deploy.sh background`
+3. Setting up a monitoring solution (e.g., PM2)
+4. Configuring proper logging in `.env`
+5. Securing your API keys and environment variables
 
 ## Contributing
 
-1. Create a feature branch (`git checkout -b feature/amazing-feature`)
-2. Make your changes
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
 ## License
 
-MIT License
-
-## Testing and Development
-
-### Message Handling System
-
-The message handling system consists of several components working together:
-
-1. **Message Queue**
-   - Manages incoming messages using a FIFO queue
-   - Implements rate limiting to prevent API abuse
-   - Handles message retry on failure
-   - Test with: `npm test src/tests/messageQueue.test.ts`
-
-2. **Message Handler**
-   - Detects message intent using keyword analysis
-   - Routes messages to appropriate handlers
-   - Manages customer context for multi-step interactions
-   - Implements rate limiting per customer
-   - Test with: `npm test src/tests/messageHandler.test.ts`
-
-3. **WhatsApp Client**
-   - Handles communication with WhatsApp Business API
-   - Manages message sending and receiving
-   - Implements connection retry logic
-   - Test with: `npm test src/tests/whatsappClient.test.ts`
-
-### Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run specific test file
-npm test src/tests/messageQueue.test.ts
-
-# Run tests with coverage
-npm run test:coverage
-```
-
-### Development Guidelines
-
-1. **Rate Limiting**
-   - Default: 20 messages per 60 seconds per customer
-   - Configurable in `config/default.json`
-   - Override with environment variables
-
-2. **Message Processing**
-   - Messages are processed asynchronously
-   - Failed messages retry up to 3 times
-   - Custom error handling per message type
-
-3. **Adding New Features**
-   - Add new message types in `types/message.ts`
-   - Implement handlers in `services/messageHandler.ts`
-   - Update tests to cover new functionality 
+This project is licensed under the MIT License - see the LICENSE file for details. 
