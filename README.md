@@ -1,58 +1,26 @@
 # WhatsApp Agent for Sticky Addiction
 
-A WhatsApp-based agent powered by AI for automated customer service and product recommendations.
+A WhatsApp-based agent powered by AI for automated customer service and product recommendations. This agent helps manage product inquiries, order processing, and customer support for Sticky Addiction's foodservice range.
 
-## Implementation Plan
+## Features
 
-### ✅ Phase 1: Core Setup and Data Models
-- ✅ Project initialization and dependency setup
-- ✅ Environment configuration
-- ✅ Database connection setup
-- ✅ Core data models implementation
-  - ✅ Product schema and model
-  - ✅ Customer schema and model
-  - ✅ Order schema and model
-- ✅ Database integration tests
+- Automated customer service via WhatsApp
+- Product catalog browsing and recommendations
+- Order processing and tracking
+- Customer profile management
+- AI-powered conversation handling
+- Analytics and reporting
 
-### 🔄 Phase 2: WhatsApp Integration (Next)
-- Set up WhatsApp Web client
-- Implement session management
-- Handle QR code generation and authentication
-- Implement message event listeners
-- Set up message queuing system
-- Implement rate limiting and retry mechanisms
+## Current Status
 
-### Phase 3: Message Processing System
-- Implement message handler service
-- Create intent detection system
-- Set up conversation state management
-- Implement product recommendation logic
-- Create order processing workflow
-- Set up notification system
+Version 0.1 - Core functionality implementation in progress. See [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for detailed development roadmap and progress.
 
-### Phase 4: AI Integration
-- Implement OpenAI integration
-- Create prompt templates
-- Set up context management
-- Implement response generation
-- Create fallback mechanisms
-- Set up AI model selection logic
+## Prerequisites
 
-### Phase 5: Business Logic
-- Implement product catalog management
-- Create order management system
-- Set up customer profile management
-- Implement analytics tracking
-- Create reporting system
-- Set up admin notifications
-
-### Phase 6: Testing and Deployment
-- Write unit tests
-- Implement integration tests
-- Set up CI/CD pipeline
-- Create deployment scripts
-- Set up monitoring
-- Create backup systems
+- Node.js >= 18.0.0
+- MongoDB Atlas account
+- WhatsApp account for testing
+- OpenAI API key
 
 ## Setup Instructions
 
@@ -61,27 +29,28 @@ A WhatsApp-based agent powered by AI for automated customer service and product 
    ```bash
    npm install
    ```
-3. Set up environment variables in `.env`
+3. Set up environment variables in `.env`:
+   ```env
+   # Required environment variables
+   MONGODB_URI=your_mongodb_connection_string
+   DB_NAME=wa_agent
+   OPENAI_API_KEY=your_openai_api_key
+   WHATSAPP_SESSION_DATA=./session-data
+   LOG_LEVEL=info
+   ```
 4. Run the development server:
    ```bash
    npm run dev
    ```
 
-## Testing
+## Available Scripts
 
-Run database tests:
-```bash
-npm run test:db
-```
-
-## Environment Variables
-
-Required environment variables:
-- `MONGODB_URI`: MongoDB connection string
-- `DB_NAME`: Database name
-- `OPENAI_API_KEY`: OpenAI API key
-- `WHATSAPP_SESSION_DATA`: WhatsApp session data path
-- `LOG_LEVEL`: Logging level (debug, info, warn, error)
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run test:db` - Run database tests
+- `npm run lint` - Run linter
+- `npm run format` - Format code
 
 ## Project Structure
 
@@ -98,11 +67,19 @@ wa-agent/
 └── session-data/       # WhatsApp session data
 ```
 
+## Documentation
+
+- [Implementation Plan](./IMPLEMENTATION_PLAN.md) - Detailed development roadmap
+- [API Documentation](./docs/API.md) - API endpoints and usage
+- [Database Schema](./docs/SCHEMA.md) - Database structure and relationships
+
 ## Contributing
 
-1. Create a feature branch
+1. Create a feature branch (`git checkout -b feature/amazing-feature`)
 2. Make your changes
-3. Submit a pull request
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
