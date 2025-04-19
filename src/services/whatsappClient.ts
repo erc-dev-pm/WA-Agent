@@ -1,143 +1,142 @@
-import { Client, LocalAuth, Message } from 'whatsapp-web.js';
+import { Client, Message } from 'whatsapp-web.js';
 import qrcode from 'qrcode-terminal';
 import { logger } from '../utils/logger';
+import { MessageQueue } from './messageQueue';
+import { MessageType, WhatsAppMessage } from '../types/message';
 
 export class WhatsAppClient {
-    private static instance: WhatsAppClient;
     private client: Client;
-    private isReady: boolean = false;
+    private messageQueue: MessageQueue;
+    private isAuthenticated: boolean = false;
+    private reconnectAttempts: number = 0;
+    private readonly maxReconnectAttempts: number = 5;
 
-    private constructor() {
-        // Initialize WhatsApp client with local authentication
+    constructor() {
         this.client = new Client({
-            authStrategy: new LocalAuth({
-                dataPath: process.env.WHATSAPP_SESSION_DATA || './session-data'
-            }),
             puppeteer: {
-                // Required for Linux/Docker environments
+                headless: true,
                 args: ['--no-sandbox', '--disable-setuid-sandbox']
             }
         });
-
+        this.messageQueue = new MessageQueue();
         this.setupEventHandlers();
     }
 
-    public static getInstance(): WhatsAppClient {
-        if (!WhatsAppClient.instance) {
-            WhatsAppClient.instance = new WhatsAppClient();
-        }
-        return WhatsAppClient.instance;
-    }
-
     private setupEventHandlers(): void {
-        // Handle QR code generation
-        this.client.on('qr', (qr) => {
-            logger.info('QR Code received. Scan with WhatsApp to authenticate.');
-            qrcode.generate(qr, { small: true });
-        });
+        this.client.on('qr', this.handleQR.bind(this));
+        this.client.on('ready', this.handleReady.bind(this));
+        this.client.on('authenticated', this.handleAuthenticated.bind(this));
+        this.client.on('auth_failure', this.handleAuthFailure.bind(this));
+        this.client.on('disconnected', this.handleDisconnected.bind(this));
+        this.client.on('message', this.handleMessage.bind(this));
+    }
 
-        // Handle successful authentication
-        this.client.on('authenticated', () => {
-            logger.info('WhatsApp client authenticated successfully');
-        });
+    private handleQR(qr: string): void {
+        logger.info('Scan the QR code below to authenticate:');
+        qrcode.generate(qr, { small: true });
+    }
 
-        // Handle authentication failures
-        this.client.on('auth_failure', (msg) => {
-            logger.error('WhatsApp authentication failed:', msg);
-        });
+    private handleReady(): void {
+        logger.info('WhatsApp client is ready');
+        this.reconnectAttempts = 0;
+    }
 
-        // Handle client ready state
-        this.client.on('ready', () => {
-            this.isReady = true;
-            logger.info('WhatsApp client is ready and listening for messages');
-        });
+    private handleAuthenticated(): void {
+        logger.info('WhatsApp client authenticated');
+        this.isAuthenticated = true;
+    }
 
-        // Handle incoming messages
-        this.client.on('message', async (message: Message) => {
-            try {
-                if (this.isReady) {
-                    logger.info(`Received message from ${message.from}: ${message.body}`);
-                    await this.handleIncomingMessage(message);
+    private handleAuthFailure(error: Error): void {
+        logger.error('Authentication failed:', error);
+        this.isAuthenticated = false;
+    }
+
+    private async handleDisconnected(reason: string): Promise<void> {
+        logger.warn('WhatsApp client disconnected:', reason);
+        this.isAuthenticated = false;
+
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.reconnectAttempts++;
+            const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+            logger.info(`Attempting to reconnect in ${delay / 1000} seconds...`);
+            
+            setTimeout(async () => {
+                try {
+                    await this.initialize();
+                } catch (error) {
+                    logger.error('Reconnection attempt failed:', error);
                 }
-            } catch (error) {
-                logger.error('Error handling message:', error);
-            }
-        });
-
-        // Handle message acknowledgments
-        this.client.on('message_ack', (msg, ack) => {
-            const ackStatus = ['ERROR', 'PENDING', 'SENT', 'RECEIVED', 'READ', 'PLAYED'][ack] || 'UNKNOWN';
-            logger.info(`Message acknowledgment status: ${ackStatus} for message: ${msg.body}`);
-        });
-
-        // Handle disconnections
-        this.client.on('disconnected', (reason) => {
-            this.isReady = false;
-            logger.warn('WhatsApp client disconnected:', reason);
-            this.handleDisconnection();
-        });
+            }, delay);
+        } else {
+            logger.error('Max reconnection attempts reached. Manual restart required.');
+        }
     }
 
-    private async handleIncomingMessage(message: Message): Promise<void> {
+    private async handleMessage(message: Message): Promise<void> {
         try {
-            // Ignore messages from groups for now
-            if (message.from.includes('@g.us')) {
-                logger.info('Ignoring group message from:', message.from);
-                return;
-            }
+            const whatsappMessage: WhatsAppMessage = {
+                id: message.id.id,
+                from: message.from,
+                to: message.to,
+                body: message.body,
+                type: this.getMessageType(message),
+                timestamp: message.timestamp,
+                mediaUrl: message.hasMedia ? await this.getMediaUrl(message) : undefined,
+                mimeType: message.type,
+                caption: message.hasMedia ? message.caption || undefined : undefined
+            };
 
-            // Get the message content
-            const content = message.body;
-
-            // For now, just echo the message back
-            if (content) {
-                logger.info(`Sending echo response to ${message.from}: ${content}`);
-                const response = await message.reply(`Received: ${content}`);
-                logger.info('Echo response sent successfully:', response.id._serialized);
-            }
+            this.messageQueue.enqueue(whatsappMessage, this.processMessage.bind(this));
         } catch (error) {
-            logger.error('Error in handleIncomingMessage:', error);
-            try {
-                await message.reply('Sorry, I encountered an error processing your message. Please try again later.');
-            } catch (replyError) {
-                logger.error('Error sending error response:', replyError);
-            }
+            logger.error('Error handling message:', error);
         }
     }
 
-    private async handleDisconnection(): Promise<void> {
-        const reconnectInterval = parseInt(process.env.WHATSAPP_RECONNECT_INTERVAL || '30000');
-        
-        logger.info(`Attempting to reconnect in ${reconnectInterval / 1000} seconds...`);
-        
-        setTimeout(async () => {
-            try {
-                await this.initialize();
-            } catch (error) {
-                logger.error('Failed to reconnect:', error);
-                await this.handleDisconnection();
-            }
-        }, reconnectInterval);
-    }
-
-    public async initialize(): Promise<void> {
+    private async getMediaUrl(message: Message): Promise<string | undefined> {
         try {
-            logger.info('Initializing WhatsApp client...');
-            await this.client.initialize();
+            if (message.hasMedia) {
+                const media = await message.downloadMedia();
+                return media.data; // Base64 encoded media data
+            }
+            return undefined;
         } catch (error) {
-            logger.error('Failed to initialize WhatsApp client:', error);
-            throw error;
+            logger.error('Error downloading media:', error);
+            return undefined;
         }
     }
 
-    public async sendMessage(to: string, message: string): Promise<void> {
-        if (!this.isReady) {
-            throw new Error('WhatsApp client is not ready');
+    private getMessageType(message: Message): MessageType {
+        switch (message.type) {
+            case 'image':
+                return MessageType.IMAGE;
+            case 'video':
+                return MessageType.VIDEO;
+            case 'audio':
+                return MessageType.AUDIO;
+            case 'document':
+                return MessageType.DOCUMENT;
+            case 'location':
+                return MessageType.LOCATION;
+            case 'vcard':
+                return MessageType.CONTACT;
+            default:
+                return MessageType.TEXT;
         }
+    }
 
+    private async processMessage(message: WhatsAppMessage): Promise<void> {
         try {
-            logger.info(`Sending message to ${to}: ${message}`);
-            await this.client.sendMessage(to, message);
+            // For now, we'll just echo the message back
+            // This will be replaced with actual message processing logic
+            await this.sendMessage(message.from, `Echo: ${message.body}`);
+        } catch (error) {
+            logger.error('Error processing message:', error);
+        }
+    }
+
+    public async sendMessage(to: string, body: string): Promise<void> {
+        try {
+            await this.client.sendMessage(to, body);
             logger.info('Message sent successfully');
         } catch (error) {
             logger.error('Error sending message:', error);
@@ -145,7 +144,35 @@ export class WhatsAppClient {
         }
     }
 
-    public isClientReady(): boolean {
-        return this.isReady;
+    public async initialize(): Promise<void> {
+        try {
+            logger.info('Initializing WhatsApp client...');
+            await this.client.initialize();
+        } catch (error) {
+            logger.error('Error initializing WhatsApp client:', error);
+            throw error;
+        }
+    }
+
+    public async destroy(): Promise<void> {
+        try {
+            logger.info('Destroying WhatsApp client...');
+            await this.client.destroy();
+            this.isAuthenticated = false;
+        } catch (error) {
+            logger.error('Error destroying WhatsApp client:', error);
+            throw error;
+        }
+    }
+
+    public getQueueStatus() {
+        return {
+            queueLength: this.messageQueue.getQueueLength(),
+            isProcessing: this.messageQueue.isProcessing()
+        };
+    }
+
+    public isConnected(): boolean {
+        return this.isAuthenticated;
     }
 } 

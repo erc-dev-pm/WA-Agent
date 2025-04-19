@@ -3,17 +3,18 @@ import { Product } from '../models/Product';
 import { Customer } from '../models/Customer';
 import { Order, OrderStatus, PaymentStatus } from '../models/Order';
 
-async function testDatabaseConnection() {
-  console.log('Testing database connection...');
-  const db = Database.getInstance();
-  await db.connect();
-  console.log('✅ Database connection successful');
-}
+describe('Database Tests', () => {
+  beforeAll(async () => {
+    const db = Database.getInstance();
+    await db.connect();
+  });
 
-async function testProductModel() {
-  console.log('\nTesting Product model...');
-  try {
-    const testProduct = new Product({
+  afterAll(async () => {
+    await Database.getInstance().disconnect();
+  });
+
+  describe('Product Model', () => {
+    const testProduct = {
       id: 'TEST-PROD-001',
       name: 'Test Chocolate Bar',
       description: 'A delicious test chocolate bar',
@@ -28,26 +29,24 @@ async function testProductModel() {
         weight: 2.4
       },
       features: ['Dark chocolate', 'Test feature']
+    };
+
+    it('should create and retrieve a product', async () => {
+      const product = new Product(testProduct);
+      await product.save();
+
+      const foundProduct = await Product.findOne({ id: testProduct.id });
+      expect(foundProduct).toBeDefined();
+      expect(foundProduct?.id).toBe(testProduct.id);
+      expect(foundProduct?.name).toBe(testProduct.name);
+      expect(foundProduct?.price).toBe(testProduct.price);
+
+      await Product.deleteOne({ id: testProduct.id });
     });
+  });
 
-    await testProduct.save();
-    console.log('✅ Product creation successful');
-
-    const foundProduct = await Product.findOne({ id: 'TEST-PROD-001' });
-    console.log('✅ Product retrieval successful');
-
-    await Product.deleteOne({ id: 'TEST-PROD-001' });
-    console.log('✅ Product deletion successful');
-  } catch (error) {
-    console.error('❌ Product model test failed:', error);
-    throw error;
-  }
-}
-
-async function testCustomerModel() {
-  console.log('\nTesting Customer model...');
-  try {
-    const testCustomer = new Customer({
+  describe('Customer Model', () => {
+    const testCustomer = {
       id: 'TEST-CUST-001',
       phoneNumber: '+61400000000',
       name: 'Test Customer',
@@ -59,35 +58,44 @@ async function testCustomerModel() {
         postcode: '2000',
         country: 'Australia'
       }]
+    };
+
+    it('should create and retrieve a customer', async () => {
+      const customer = new Customer(testCustomer);
+      await customer.save();
+
+      const foundCustomer = await Customer.findByPhone(testCustomer.phoneNumber);
+      expect(foundCustomer).toBeDefined();
+      expect(foundCustomer?.phoneNumber).toBe(testCustomer.phoneNumber);
+      expect(foundCustomer?.name).toBe(testCustomer.name);
+      expect(foundCustomer?.addresses).toHaveLength(1);
+      expect(foundCustomer?.addresses[0].street).toBe(testCustomer.addresses[0].street);
+
+      await Customer.deleteOne({ id: testCustomer.id });
     });
 
-    await testCustomer.save();
-    console.log('✅ Customer creation successful');
+    it('should add a new address to customer', async () => {
+      const customer = new Customer(testCustomer);
+      await customer.save();
 
-    const foundCustomer = await Customer.findByPhone('+61400000000');
-    console.log('✅ Customer retrieval successful');
+      const newAddress = {
+        street: '456 Test Ave',
+        city: 'Melbourne',
+        state: 'VIC',
+        postcode: '3000',
+        country: 'Australia'
+      };
 
-    await testCustomer.addAddress({
-      street: '456 Test Ave',
-      city: 'Melbourne',
-      state: 'VIC',
-      postcode: '3000',
-      country: 'Australia'
+      await customer.addAddress(newAddress);
+      expect(customer.addresses).toHaveLength(2);
+      expect(customer.addresses[1]).toMatchObject(newAddress);
+
+      await Customer.deleteOne({ id: testCustomer.id });
     });
-    console.log('✅ Customer address addition successful');
+  });
 
-    await Customer.deleteOne({ id: 'TEST-CUST-001' });
-    console.log('✅ Customer deletion successful');
-  } catch (error) {
-    console.error('❌ Customer model test failed:', error);
-    throw error;
-  }
-}
-
-async function testOrderModel() {
-  console.log('\nTesting Order model...');
-  try {
-    const testOrder = new Order({
+  describe('Order Model', () => {
+    const testOrder = {
       id: 'TEST-ORDER-001',
       customerId: 'TEST-CUST-001',
       items: [{
@@ -104,38 +112,19 @@ async function testOrderModel() {
         postcode: '2000',
         country: 'Australia'
       }
+    };
+
+    it('should create and update order status', async () => {
+      const order = new Order(testOrder);
+      await order.save();
+
+      await order.updateStatus(OrderStatus.CONFIRMED, 'Test confirmation');
+      expect(order.status).toBe(OrderStatus.CONFIRMED);
+
+      await order.updatePaymentStatus(PaymentStatus.PAID);
+      expect(order.paymentStatus).toBe(PaymentStatus.PAID);
+
+      await Order.deleteOne({ id: testOrder.id });
     });
-
-    await testOrder.save();
-    console.log('✅ Order creation successful');
-
-    await testOrder.updateStatus(OrderStatus.CONFIRMED, 'Test confirmation');
-    console.log('✅ Order status update successful');
-
-    await testOrder.updatePaymentStatus(PaymentStatus.PAID);
-    console.log('✅ Order payment status update successful');
-
-    await Order.deleteOne({ id: 'TEST-ORDER-001' });
-    console.log('✅ Order deletion successful');
-  } catch (error) {
-    console.error('❌ Order model test failed:', error);
-    throw error;
-  }
-}
-
-async function runTests() {
-  try {
-    console.log('Starting database tests...\n');
-    await testDatabaseConnection();
-    await testProductModel();
-    await testCustomerModel();
-    await testOrderModel();
-    console.log('\n✅ All tests completed successfully!');
-    process.exit(0);
-  } catch (error) {
-    console.error('\n❌ Tests failed:', error);
-    process.exit(1);
-  }
-}
-
-runTests(); 
+  });
+}); 

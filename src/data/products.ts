@@ -21,7 +21,8 @@ export const products: Product[] = [
       format: 'Vacuum Sealed Pouch'
     },
     carton: {
-      units: 10
+      units: 10,
+      price: 249.99
     },
     inStock: true
   },
@@ -45,7 +46,8 @@ export const products: Product[] = [
     },
     carton: {
       units: 10,
-      weight: 10000
+      weight: 10000,
+      price: 279.99
     },
     inStock: true
   },
@@ -70,7 +72,8 @@ export const products: Product[] = [
       format: 'Vacuum Sealed Pouch'
     },
     carton: {
-      units: 14
+      units: 14,
+      price: 299.99
     },
     inStock: true
   },
@@ -94,7 +97,8 @@ export const products: Product[] = [
     },
     carton: {
       units: 10,
-      weight: 10000
+      weight: 10000,
+      price: 259.99
     },
     inStock: true
   },
@@ -122,7 +126,8 @@ export const products: Product[] = [
     },
     carton: {
       units: 10,
-      weight: 10000
+      weight: 10000,
+      price: 189.99
     },
     inStock: true
   },
@@ -150,7 +155,8 @@ export const products: Product[] = [
     },
     carton: {
       units: 10,
-      weight: 10000
+      weight: 10000,
+      price: 189.99
     },
     inStock: true
   },
@@ -175,7 +181,8 @@ export const products: Product[] = [
     },
     carton: {
       units: 10,
-      weight: 9600
+      weight: 9600,
+      price: 159.99
     },
     inStock: true
   }

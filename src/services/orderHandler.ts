@@ -1,5 +1,5 @@
 import { MessageContext, OrderStage, WhatsAppResponse } from '../types/message';
-import { Order, OrderItem, OrderStatus, Address } from '../types/product';
+import { Address } from '../types/product';
 import { OrderService } from './orderService';
 import { products } from '../data/products';
 

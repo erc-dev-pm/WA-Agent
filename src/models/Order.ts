@@ -1,5 +1,4 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { IProduct } from './Product';
 
 export enum OrderStatus {
   PENDING = 'PENDING',

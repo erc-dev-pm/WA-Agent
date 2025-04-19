@@ -1,4 +1,4 @@
-import { Order, OrderItem, OrderStatus, PaymentStatus, Product } from '../types/product';
+import { Order, OrderItem, OrderStatus, PaymentStatus } from '../types/product';
 import { products } from '../data/products';
 
 export class OrderService {

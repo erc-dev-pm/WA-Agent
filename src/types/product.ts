@@ -21,6 +21,7 @@ export interface ProductUnit {
 export interface CartonFormat {
   units: number;
   weight?: number; // in grams
+  price: number; // price per carton
 }
 
 export interface Product {
