@@ -27,11 +27,15 @@ export interface WhatsAppMessage {
   id: string;
   type: MessageType;
   from: string;
+  to?: string;
   body: string;
   timestamp: number;
-  hasMedia: boolean;
+  hasMedia?: boolean;
   media?: MessageMedia;
+  mediaUrl?: string;  // URL to the media file
+  mimeType?: string;
   caption?: string;
+  isGroupMsg?: boolean; // Indicates if the message is from a group chat
   location?: {
     latitude: number;
     longitude: number;
@@ -41,13 +45,20 @@ export interface WhatsAppMessage {
     name: string;
     number: string;
   };
-  originalMessage: Message;
+  originalMessage?: Message;
 }
 
 export interface MessageContext {
+  userId: string;
   currentProduct?: Product;
   currentOrder?: string; // Order ID
   lastIntent?: MessageIntent;
+  lastInteraction: number; // Timestamp of the last interaction
+  conversationHistory: Array<{
+    role: 'user' | 'assistant';
+    content: string;
+    timestamp: number;
+  }>;
   deliveryAddress?: {
     street: string;
     city: string;
@@ -69,8 +80,10 @@ export enum OrderStage {
   PRODUCT_SELECTION = 'PRODUCT_SELECTION',
   QUANTITY_SELECTION = 'QUANTITY_SELECTION',
   ADDRESS_COLLECTION = 'ADDRESS_COLLECTION',
-  PAYMENT_PENDING = 'PAYMENT_PENDING',
-  CONFIRMATION = 'CONFIRMATION'
+  PAYMENT_SELECTION = 'PAYMENT_SELECTION',
+  CONFIRMATION = 'CONFIRMATION',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED'
 }
 
 export interface WhatsAppResponse {

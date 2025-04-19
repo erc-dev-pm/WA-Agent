@@ -61,6 +61,18 @@ class WhatsAppClient {
     // Message event
     this.client.on('message', async (message) => {
       if (this.messageHandler) {
+        // Check if message is from a group
+        let isGroupMsg = false;
+        try {
+          const chat = await message.getChat();
+          isGroupMsg = chat.isGroup;
+        } catch (error) {
+          console.error('Error checking if message is from group:', error);
+        }
+        
+        // Add isGroupMsg property to the message object
+        message.isGroupMsg = isGroupMsg;
+        
         await this.messageHandler(message);
       }
     });
@@ -76,6 +88,9 @@ class WhatsAppClient {
         if (chat.isGroup) {
           const mentions = await message.getMentions();
           const isMentioned = mentions.some(m => m.isMe);
+          
+          // Add isGroupMsg property to the message object
+          message.isGroupMsg = true;
           
           if (isMentioned && this.messageHandler) {
             await this.messageHandler(message);

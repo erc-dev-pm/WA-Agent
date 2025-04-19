@@ -20,10 +20,13 @@
     "test:mcp": "ts-node src/tests/mcpIntegrationTest.ts",
     "test:mcp-simple": "ts-node src/tests/mcpTest.ts",
     "test:openrouter-mcp": "ts-node src/tests/openRouterMCPIntegrationTest.ts",
+    "test:veyrax": "ts-node src/scripts/testVeyraxIntegration.ts",
+    "test:smithery-mcp": "ts-node src/scripts/testSmitheryMCP.ts",
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.9.0",
+    "@modelcontextprotocol/sdk": "^1.10.1",
+    "@smithery/sdk": "^1.0.4",
     "dotenv": "^16.5.0",
     "mongoose": "^8.13.2",
     "openai": "^4.0.0",
@@ -54,8 +57,13 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "testMatch": ["**/*.test.ts"],
-    "moduleFileExtensions": ["ts", "js"],
+    "testMatch": [
+      "**/*.test.ts"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
     "transform": {
       "^.+\\.ts$": "ts-jest"
     }
