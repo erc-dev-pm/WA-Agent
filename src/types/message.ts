@@ -1,4 +1,5 @@
 import { Product } from './product';
+import { Message, MessageMedia } from 'whatsapp-web.js';
 
 export enum MessageIntent {
   BROWSE_PRODUCTS = 'BROWSE_PRODUCTS',
@@ -11,19 +12,50 @@ export enum MessageIntent {
   PAYMENT = 'PAYMENT'
 }
 
+export enum MessageType {
+  TEXT = 'text',
+  IMAGE = 'image',
+  VIDEO = 'video',
+  AUDIO = 'audio',
+  DOCUMENT = 'document',
+  LOCATION = 'location',
+  CONTACT = 'contact',
+  UNKNOWN = 'unknown'
+}
+
 export interface WhatsAppMessage {
-  messageId: string;
-  from: string; // Customer's WhatsApp number
-  timestamp: Date;
-  content: string;
-  intent?: MessageIntent;
-  context?: MessageContext;
+  id: string;
+  type: MessageType;
+  from: string;
+  body: string;
+  timestamp: number;
+  hasMedia: boolean;
+  media?: MessageMedia;
+  caption?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+    description?: string;
+  };
+  contact?: {
+    name: string;
+    number: string;
+  };
+  originalMessage: Message;
 }
 
 export interface MessageContext {
   currentProduct?: Product;
   currentOrder?: string; // Order ID
   lastIntent?: MessageIntent;
+  deliveryAddress?: {
+    street: string;
+    city: string;
+    state: string;
+    postcode: string;
+    country: string;
+    instructions?: string;
+  };
   orderInProgress?: {
     items: Array<{
       productId: string;
@@ -55,4 +87,15 @@ export interface WhatsAppAttachment {
   caption?: string;
   latitude?: number;
   longitude?: number;
+}
+
+export interface MessageResponse {
+  success: boolean;
+  error?: string;
+  data?: any;
+}
+
+export interface MessageQueueStatus {
+  queueLength: number;
+  isProcessing: boolean;
 } 
