@@ -1,6 +1,6 @@
 # WhatsApp MCP Agent Implementation Plan
 
-## Current Progress (as of 2025-04-25)
+## Current Progress (as of 2025-04-26)
 
 ### ✅ Phase 1: Core Infrastructure
 - [x] Project Setup
@@ -98,7 +98,39 @@
   - [ ] Backup procedures
   - [ ] Update mechanisms
 
-### Phase 6: Product Management
+### 🚧 Phase 6: VeyraX Integration
+- [x] VeyraX API Configuration
+  - [x] Environment configuration for VeyraX
+  - [x] API key integration
+  - [x] Smithery transport setup
+  - [x] Contact VeyraX support for tool access
+
+- [x] VeyraX SDK Integration
+  - [x] VeyraX client implementation
+  - [x] Mock implementation for testing
+  - [x] Integration with Smithery SDK instead of official VeyraX SDK
+
+- [x] VeyraX as MCP Server
+  - [x] MCP server connection via Smithery
+  - [ ] Tool retrieval from VeyraX (pending account activation)
+  - [ ] Tool execution through VeyraX (pending account activation)
+  - [x] Integration with MCPManager
+
+- [x] Enhanced Message Processing with VeyraX
+  - [x] Streaming text capabilities
+  - [x] Tool invocation handling
+  - [x] Error handling for VeyraX operations
+  - [x] Message persistence
+
+- [x] VeyraX Integration Testing
+  - [x] Smithery connection tests
+  - [x] Transport layer tests
+  - [ ] VeyraX tools tests (pending account activation)
+  - [ ] Streaming response tests (pending account activation)
+  - [ ] End-to-end WhatsApp-VeyraX flow tests (pending account activation)
+  - [x] Documentation for Smithery SDK usage
+
+### Phase 7: Product Management
 - [ ] Product Catalog Enhancement
   - [ ] Bulk import/export functionality
   - [ ] Price history tracking
@@ -111,7 +143,7 @@
   - [ ] Delivery tracking
   - [ ] Order history
 
-### Phase 7: Analytics & Enhancements
+### Phase 8: Analytics & Enhancements
 - [ ] Analytics & Reporting
   - [ ] Usage metrics
   - [ ] Performance monitoring
@@ -142,8 +174,12 @@ WHATSAPP_WEBHOOK_URL=https://yourdomain.com/webhook
 
 # MCP Configuration
 MCP_ENABLED=true
-MCP_SERVER_URL=your_mcp_server_url
-MCP_API_KEY=your_mcp_api_key
+MCP_SERVER_URL=https://server.smithery.ai/@VeyraX/veyrax-mcp/ws
+SMITHERY_API_KEY=your_smithery_api_key
+
+# VeyraX Configuration
+VEYRAX_API_KEY=your_veyrax_api_key
+VEYRAX_API_BASE_URL=https://api.veyrax.com
 
 # Database Configuration
 MONGODB_URI=mongodb://localhost:27017/whatsapp-mcp-agent
@@ -164,7 +200,8 @@ RATE_LIMIT_MAX_MESSAGES=30
 ```json
 {
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.9.0",
+    "@modelcontextprotocol/sdk": "^1.10.1",
+    "@smithery/sdk": "^1.0.4",
     "whatsapp-web.js": "^1.27.0",
     "mongoose": "^8.13.2",
     "dotenv": "^16.5.0",
@@ -209,12 +246,43 @@ RATE_LIMIT_MAX_MESSAGES=30
 - [x] MCP integration tests
 - [x] OpenRouter integration tests
 - [x] Full OpenRouter-MCP-WhatsApp integration test
+- [x] Smithery transport layer tests
+- [ ] VeyraX tools tests (pending account activation)
 
 ### End-to-End Tests
 - [ ] Complete order flow
 - [ ] Product inquiry flow
 - [ ] Payment processing flow
 - [ ] Error handling scenarios
+
+## VeyraX Integration Status
+
+### Current Status
+- ✅ Successfully connected to VeyraX MCP server via Smithery
+- ✅ API keys and environment variables configured
+- ✅ Email sent to VeyraX support requesting tool activation
+- ❌ No tools available from VeyraX MCP server yet
+- ✅ Created comprehensive documentation for Smithery SDK integration
+
+### Next Steps
+- [ ] Await response from VeyraX support regarding tool activation
+- [ ] Verify requirements for tool access (subscription, account setup)
+- [ ] Request documentation on available tools and their parameters
+- [ ] Complete testing once tools are available
+
+## Smithery SDK Integration
+
+### Status
+- ✅ Successfully integrated Smithery SDK as transport layer
+- ✅ Created test script to validate connection to VeyraX MCP server
+- ✅ Implemented MCPManager with Smithery transport support
+- ✅ Created comprehensive documentation in docs/SMITHERY_USAGE.md
+- ✅ Updated installation guide to reflect Smithery requirements
+
+### Outstanding Items
+- [ ] Complete testing with actual VeyraX tools once activated
+- [ ] Create examples of real-world tool usage with Smithery
+- [ ] Implement advanced streaming capabilities with tool support
 
 ## Deployment Strategy
 
@@ -243,6 +311,9 @@ RATE_LIMIT_MAX_MESSAGES=30
 - [x] Database schema
 - [x] Configuration guide
 - [x] Deployment guide
+- [x] VeyraX installation guide
+- [x] VeyraX usage guide
+- [x] Smithery SDK usage guide
 
 ### User Documentation
 - [ ] User guide
@@ -270,9 +341,12 @@ RATE_LIMIT_MAX_MESSAGES=30
 - ✅ Multi-modal support
 
 ### Version 0.3 (Current)
-- 🚧 Testing infrastructure
-- 🚧 Deployment preparation
-- 🚧 Documentation
+- ✅ Testing infrastructure
+- ✅ Deployment preparation
+- ✅ Documentation
+- ✅ Smithery integration for VeyraX
+- 🚧 VeyraX tools integration (pending account activation)
+- ✅ Integration test script for Smithery-MCP connection
 - [ ] Production deployment
 
 ### Version 0.4 (Planned)
@@ -287,6 +361,9 @@ RATE_LIMIT_MAX_MESSAGES=30
 
 ## Notes
 - This plan is a living document and will be updated as development progresses
+- VeyraX tool access requires contacting support for activation
+- Email sent to VeyraX support on 2025-04-26 requesting tool access
+- Smithery SDK is being used as the transport layer to access VeyraX MCP server
 - Priorities may shift based on business requirements
 - Technical decisions should be documented and reviewed
 - Regular testing and security audits should be conducted
